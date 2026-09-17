@@ -41,7 +41,8 @@ export class AmbientMusic {
     TRACKS.forEach((t, i) => {
       const el = new Audio(t.src)
       el.crossOrigin = 'anonymous'
-      el.preload = 'auto'
+      // 只预加载第一首（立即播放），其余先不下载，等快轮到时再缓冲
+      el.preload = i === 0 ? 'auto' : 'none'
       el.loop = false
       el.volume = 1
       const src = ctx.createMediaElementSource(el)
@@ -69,6 +70,11 @@ export class AmbientMusic {
 
     if (cur.duration && isFinite(cur.duration)) {
       const remain = cur.duration - cur.currentTime
+      // 提前约 60 秒开始缓冲下一首（避免交叉淡入时还没下载完）
+      if (remain <= 60 && next.preload !== 'auto') {
+        next.preload = 'auto'
+        next.load()
+      }
       // 剩 crossfade 秒时启动下一首并交叉淡入淡出
       if (remain <= this.crossfade + 0.2 && next.paused) {
         void next.play().catch(() => {})
