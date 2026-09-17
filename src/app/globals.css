@@ -1,0 +1,1433 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #0a0710;
+  color: #ece6f5;
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(201, 169, 97, 0.3);
+  color: #fff;
+}
+
+/* 细窄的暗金滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 97, 0.35) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 97, 0.28);
+  border-radius: 999px;
+}
+
+/* 页面淡入 */
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-rise {
+  animation: fade-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ------------------------------------------------------------------ */
+/* Leaflet 地图皮肤                                                    */
+/* ------------------------------------------------------------------ */
+
+.leaflet-container {
+  background: #0a0710;
+  font-family: inherit;
+  outline: none;
+}
+
+/* CARTO 深色底图：再沉一点、降低饱和度，接近墨黑紫 */
+.map-mode-carto .leaflet-tile-pane {
+  filter: brightness(0.8) contrast(0.97) saturate(0.5);
+}
+
+/* 高德浅色底图：反色 + 色相反转，压成暗紫黑金调 */
+.map-mode-gaode .leaflet-tile-pane {
+  filter:
+    invert(1)
+    hue-rotate(210deg)
+    saturate(0.62)
+    brightness(0.9)
+    contrast(0.98);
+}
+
+/* 缩放控件 */
+.leaflet-control-zoom {
+  border: 1px solid rgba(201, 169, 97, 0.25) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55) !important;
+  margin: 0 18px 36px 0 !important;
+}
+.leaflet-bar a {
+  background: rgba(21, 14, 34, 0.92) !important;
+  color: #e3cb8f !important;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.18) !important;
+  width: 38px !important;
+  height: 38px !important;
+  line-height: 38px !important;
+  font-size: 20px !important;
+  backdrop-filter: blur(10px);
+  transition: background 0.2s ease;
+}
+.leaflet-bar a:hover {
+  background: rgba(42, 29, 68, 0.96) !important;
+  color: #fff !important;
+}
+
+/* 版权信息 */
+.leaflet-control-attribution {
+  background: rgba(10, 7, 16, 0.55) !important;
+  color: #6f648a !important;
+  font-size: 10px !important;
+  padding: 2px 10px !important;
+  border-radius: 10px 0 0;
+  margin-bottom: 10px !important;
+}
+.leaflet-control-attribution a {
+  color: #8a7bb0 !important;
+}
+
+/* 金色标记点 */
+.map-pin-icon {
+  background: transparent;
+  border: none;
+}
+.map-pin {
+  position: relative;
+  display: block;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+}
+.map-pin .dot {
+  position: absolute;
+  inset: 8px;
+  border-radius: 999px;
+  background: #e3cb8f;
+  box-shadow:
+    0 0 6px rgba(227, 203, 143, 0.95),
+    0 0 18px rgba(201, 169, 97, 0.55);
+}
+.map-pin .ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(227, 203, 143, 0.75);
+  animation: pin-ring 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+@keyframes pin-ring {
+  0% {
+    transform: scale(0.45);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+/* 弹出卡片：去掉 Leaflet 默认白底，交给内部的卡片自行设计 */
+.place-popup .leaflet-popup-content-wrapper {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+.place-popup .leaflet-popup-content {
+  margin: 0;
+  width: min(86vw, 340px) !important;
+}
+.place-popup .leaflet-popup-tip {
+  display: none;
+}
+.place-popup .leaflet-popup-close-button {
+  display: none;
+}
+.leaflet-popup {
+  margin-bottom: 8px;
+  /* 只能做 opacity 动画：Leaflet 用 transform 给弹窗定位，覆盖会导致错位 */
+  animation: popup-fade 0.3s ease both;
+}
+@keyframes popup-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* 入场动效放在内部卡片上，不影响 Leaflet 的定位 */
+.place-popup .leaflet-popup-content-wrapper > * {
+  animation: fade-rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ------------------------------------------------------------------ */
+/* 克林姆特式装饰分隔线（页面标题下）                                   */
+/* ------------------------------------------------------------------ */
+
+.klimt-rule {
+  display: block;
+  position: relative;
+  height: 1px;
+  width: 220px;
+  max-width: 70%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(201, 169, 97, 0.15) 12%,
+    rgba(227, 203, 143, 0.65) 50%,
+    rgba(201, 169, 97, 0.15) 88%,
+    transparent
+  );
+}
+.klimt-rule::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  background: #e3cb8f;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-shadow:
+    0 0 0 2px rgba(10, 7, 16, 1),
+    0 0 10px rgba(227, 203, 143, 0.7);
+}
+.klimt-rule::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 26px);
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  background: #C9A961;
+  /* 用 clip-path 做菱形而非 rotate，box-shadow 才会保持水平对称 */
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  transform: translateY(-50%);
+  box-shadow: 52px 0 0 #C9A961;
+}
+
+/* ------------------------------------------------------------------ */
+/* 关卡卡片：克里姆特生图边框（CSS mask 中空，只显示 padding 边框区域） */
+/* ------------------------------------------------------------------ */
+.note-card {
+  position: relative;
+}
+.klimt-border-img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.62;
+  border-radius: inherit;
+  box-sizing: border-box;
+  padding: 14px;
+  /* mask：content-box 区域透明，padding 边框区域显示 background */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+          mask-composite: exclude;
+}
+@media (min-width: 640px) {
+  .klimt-border-img {
+    padding: 18px;
+    opacity: 0.7;
+  }
+}
+/* reduce motion 不影响边框，但避免重绘闪烁 */
+@media (prefers-reduced-motion: reduce) {
+  .klimt-border-img {
+    opacity: 0.5;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* 入场票据                                                            */
+/* ------------------------------------------------------------------ */
+
+/* 入场门底：墨黑紫 + 顶部微光 */
+.gate-bg {
+  background-color: #0a0710;
+  background-image:
+    radial-gradient(110% 80% at 50% 0%, rgba(110, 79, 176, 0.2), transparent 60%),
+    radial-gradient(80% 60% at 82% 112%, rgba(201, 169, 97, 0.07), transparent 60%);
+}
+
+/* 门内缓慢游移的暗金紫光（加亮） */
+.gate-aurora {
+  background:
+    radial-gradient(30% 26% at 24% 30%, rgba(212, 175, 100, 0.24), transparent 70%),
+    radial-gradient(26% 24% at 76% 66%, rgba(227, 203, 143, 0.17), transparent 70%),
+    radial-gradient(38% 34% at 62% 18%, rgba(157, 124, 216, 0.2), transparent 72%),
+    radial-gradient(24% 22% at 44% 78%, rgba(201, 169, 97, 0.14), transparent 70%);
+  filter: blur(46px);
+  animation: gold-drift 30s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* 票据背后的柔光晕，缓慢呼吸 */
+.ticket-glow {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(212, 175, 100, 0.22), rgba(110, 79, 176, 0.12) 55%, transparent 78%);
+  filter: blur(34px);
+  animation: glow-breathe 5.5s ease-in-out infinite;
+}
+
+/* 票套：深投影 + 金色外辉，悬停轻抬 */
+.ticket-sleeve {
+  filter: drop-shadow(0 38px 70px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 42px rgba(201, 169, 97, 0.12));
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.ticket-sleeve:hover {
+  transform: translateY(-4px);
+}
+.ticket-sleeve:focus-visible {
+  filter: drop-shadow(0 0 0 2px rgba(227, 203, 143, 0.65))
+    drop-shadow(0 38px 70px rgba(0, 0, 0, 0.7));
+}
+
+/* 两半票：金边夹层 */
+.ticket-half {
+  will-change: transform, opacity;
+}
+.half-rim {
+  background: linear-gradient(160deg, #f4dd92 0%, #d4ab4e 38%, #9a722c 72%, #e7c874 100%);
+  box-shadow: inset 0 0 0 1px rgba(74, 47, 10, 0.55);
+}
+
+/* 深色纸面：纤维丝 + 紫光 + 金缎光 + 厚纸压暗边 */
+.paper-dark {
+  background-color: #150e20;
+  background-image:
+    repeating-linear-gradient(118deg, rgba(232, 220, 255, 0.028) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(28deg, rgba(227, 203, 143, 0.02) 0 1px, transparent 1px 7px),
+    radial-gradient(120% 90% at 50% -12%, rgba(157, 124, 216, 0.15), transparent 60%),
+    linear-gradient(124deg, rgba(227, 203, 143, 0.08) 0%, transparent 28%, transparent 72%, rgba(227, 203, 143, 0.06) 100%),
+    linear-gradient(180deg, #1b132a, #140d1e);
+  box-shadow:
+    inset 0 0 64px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(227, 203, 143, 0.16);
+}
+
+/* 金箔板上的流动缎光 */
+.foil-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 28%,
+    rgba(255, 246, 212, 0.34) 47%,
+    rgba(255, 246, 212, 0.08) 52%,
+    transparent 66%
+  );
+  background-size: 260% 260%;
+  mix-blend-mode: overlay;
+  animation: sheen-pan 7s ease-in-out infinite alternate;
+}
+
+/* 金箔上闪烁的高光星点 */
+@keyframes gold-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.6);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  70% {
+    opacity: 0.4;
+    transform: scale(0.9);
+  }
+}
+.gold-sparkle {
+  transform-origin: center;
+  animation: gold-twinkle 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 2px rgba(255, 247, 221, 0.9));
+}
+
+/* 深色票面上的金箔颗粒（SVG 噪声，无图片文件） */
+.foil-grain {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* 撕线齿孔 */
+.seam-notch {
+  background: #0a0710;
+  box-shadow:
+    0 0 0 1.5px #0a0710,
+    0 0 0 2.5px rgba(201, 169, 97, 0.5);
+}
+
+/* 票孔：真实车票的小圆齿孔 */
+.perf-hole {
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+/* 逐个爆开：从撕口处依次弹出，伴随金光一闪 */
+@keyframes perf-pop {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  35% {
+    transform: translateX(-50%) scale(1.8);
+    opacity: 1;
+    box-shadow: 0 0 8px 2px rgba(255, 240, 180, 0.9);
+  }
+  100% {
+    transform: translateX(-50%) scale(0);
+    opacity: 0;
+  }
+}
+.perf-hole.is-torn {
+  animation: perf-pop 0.22s ease-out forwards;
+}
+
+/* 撕开时裂缝透出的新世界光芒 */
+.tear-glow {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 97, 0.0) 20%,
+    rgba(255, 240, 180, 0.55) 50%,
+    rgba(201, 169, 97, 0.0) 80%,
+    transparent
+  );
+  filter: blur(10px);
+  animation: tear-glow-pulse 0.9s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes tear-glow-pulse {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.4);
+  }
+  40% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(2.4);
+  }
+}
+
+/* 眼睛眨眼：垂直压扁再恢复 */
+.eye-blink {
+  animation: eye-blink 0.36s ease-in-out;
+}
+@keyframes eye-blink {
+  0% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(0.08);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+/* 待撕时票据轻轻漂浮 */
+@keyframes ticket-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(0.16deg);
+  }
+}
+.ticket-float {
+  animation: ticket-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 票据入场：缓慢浮现 */
+@keyframes ticket-enter {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.ticket-enter {
+  animation: ticket-enter 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 左半票：向左下方加速滑开，微旋 */
+@keyframes half-left-out {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-132%, 14%) rotate(-7deg);
+    opacity: 0;
+  }
+}
+.half-left-out {
+  animation: half-left-out 1.2s cubic-bezier(0.55, 0, 0.85, 0.35) both;
+  transform-origin: 100% 46%;
+}
+
+/* 右半票：向右下方加速滑开，微旋 */
+@keyframes half-right-out {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(132%, 14%) rotate(7deg);
+    opacity: 0;
+  }
+}
+.half-right-out {
+  animation: half-right-out 1.2s cubic-bezier(0.55, 0, 0.85, 0.35) both;
+  transform-origin: 0% 46%;
+}
+
+/* 金箔碎：从撕线向两侧翻转飞散 */
+@keyframes paper-frag-fly {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) rotate(0deg) scale(1);
+  }
+  14% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.95;
+    transform: translate(calc(-50% + var(--dx) * 0.5), calc(var(--dy) * 0.5))
+      rotate(calc(var(--rot) * 0.5)) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), var(--dy)) rotate(var(--rot)) scale(0.7);
+  }
+}
+.paper-frag {
+  position: absolute;
+  z-index: 20;
+  margin-left: 0;
+  background: linear-gradient(135deg, #f6e2a8 0%, #d4ab4e 45%, #7c5c24 100%);
+  clip-path: polygon(50% 0, 100% 38%, 72% 100%, 18% 82%, 0 30%);
+  animation: paper-frag-fly 1.3s cubic-bezier(0.42, 0, 0.58, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* 底部提示呼吸（放轻放慢） */
+@keyframes hint-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.ticket-hint {
+  animation: hint-breathe 3.6s ease-in-out infinite;
+}
+
+/* 全站流金背景：两团暗金紫光极缓慢游移 */
+@keyframes gold-drift {
+  0% {
+    transform: translate3d(-3%, -2%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, 2.5%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-1%, 3%, 0) scale(1.04);
+  }
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(34% 30% at 20% 24%, rgba(212, 175, 100, 0.17), transparent 68%),
+    radial-gradient(30% 27% at 80% 70%, rgba(227, 203, 143, 0.13), transparent 68%),
+    radial-gradient(42% 36% at 62% 14%, rgba(157, 124, 216, 0.16), transparent 72%),
+    radial-gradient(36% 32% at 28% 86%, rgba(110, 79, 176, 0.14), transparent 72%),
+    radial-gradient(20% 18% at 50% 48%, rgba(201, 169, 97, 0.1), transparent 70%);
+  filter: blur(52px);
+  animation: gold-drift 30s ease-in-out infinite alternate;
+  will-change: transform;
+}
+/* 斜向缎光，缓慢扫过 */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(227, 203, 143, 0.075) 49%,
+    rgba(244, 226, 168, 0.05) 51%,
+    transparent 60%
+  );
+  background-size: 260% 260%;
+  animation: sheen-pan 24s ease-in-out infinite alternate;
+}
+@keyframes sheen-pan {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 100%;
+  }
+}
+
+/* ===== 马桶里 · 塔罗抽牌（扇形牌阵 + 横向滑动轴）===== */
+.tarot-scroller {
+  --step: 50px;
+  --rstep: 4deg;
+  --arcstep: 2.4px;
+  --card-w: 116px;
+  --fan-pad: 56px;
+  /* 加高部分用于容纳边缘牌旋转后的下垂角，再用负底边距抵消占位 */
+  height: 272px;
+  margin-bottom: -32px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  cursor: grab;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 26px,
+    #000 calc(100% - 26px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 26px,
+    #000 calc(100% - 26px),
+    transparent 100%
+  );
+}
+.tarot-scroller:active {
+  cursor: grabbing;
+}
+.tarot-scroller::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 640px) {
+  .tarot-scroller {
+    --step: 165px;
+    --rstep: 4.5deg;
+    --arcstep: 5px;
+    --card-w: 205px;
+    --fan-pad: 120px;
+    height: 530px;
+    margin-bottom: -60px;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 64px,
+      #000 calc(100% - 64px),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 64px,
+      #000 calc(100% - 64px),
+      transparent 100%
+    );
+  }
+}
+/* 扇形画布：宽度按牌数动态展开，窄屏时居中、宽屏时可横滑 */
+.tarot-fan {
+  position: relative;
+  height: 100%;
+  width: calc((var(--n) - 1) * var(--step) + var(--card-w) + var(--fan-pad));
+  min-width: 100%;
+  margin: 0 auto;
+}
+.tarot-card {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  perspective: 1200px;
+  transform:
+    translate(-50%, 0)
+    translateX(calc((var(--i) - var(--c)) * var(--step)))
+    translateY(calc(var(--an) * var(--arcstep)))
+    rotate(calc((var(--i) - var(--c)) * var(--rstep)));
+  transition:
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.55s ease;
+  animation: tarot-deal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: transform, opacity;
+}
+.tarot-card:hover {
+  z-index: 25 !important;
+}
+/* 抽牌/退场后，发牌动画不再用 fill 态压住类样式 */
+.tarot-card.is-drawn,
+.tarot-card.is-rest {
+  animation: none;
+}
+.tarot-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.34, 1.15, 0.4, 1);
+}
+.tarot-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.tarot-front {
+  transform: rotateY(180deg);
+}
+/* 悬停：轻轻提起 */
+.tarot-card:not(.is-drawn):not(.is-rest):hover .tarot-inner {
+  transform: translateY(-12px);
+}
+/* 抽中：归正、放大、翻面 */
+.tarot-card.is-drawn {
+  transform: translate(-50%, 0) translateY(-6px) rotate(0deg) scale(1.06);
+}
+.tarot-card.is-drawn .tarot-inner {
+  transform: translateY(-10px) rotateY(180deg);
+}
+@media (min-width: 640px) {
+  .tarot-card {
+    bottom: 60px;
+  }
+  .tarot-card.is-drawn {
+    transform: translate(-50%, 0) translateY(-12px) rotate(0deg) scale(1.22);
+  }
+  .tarot-card.is-drawn .tarot-inner {
+    transform: translateY(-22px) rotateY(180deg);
+  }
+}
+/* 其余牌退场 */
+.tarot-card.is-rest {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 0) translateY(58px) rotate(0deg) scale(0.85);
+}
+
+@keyframes tarot-deal {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0) translateY(56px) scale(0.92) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform:
+      translate(-50%, 0)
+      translateX(calc((var(--i) - var(--c)) * var(--step)))
+      translateY(calc(var(--an) * var(--arcstep)))
+      rotate(calc((var(--i) - var(--c)) * var(--rstep)));
+  }
+}
+.tarot-hint {
+  animation: hint-breathe 3.6s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* 鎏金帘幕：金线编成的剧院幕布，撕票后从中间向两侧缓拉                  */
+/* ------------------------------------------------------------------ */
+
+/* 金线层：整屏细密金线，开幕时各自差速滑开，形成自然帘弧 */
+.curtain-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* 极淡的竖向褶影，随开幕迅速消隐，避免金线像塑料格栅 */
+.curtain-folds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 80% at 50% -10%, rgba(46, 31, 78, 0.28), transparent 62%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 246, 220, 0.022) 0 26px,
+      rgba(0, 0, 0, 0.14) 26px 52px,
+      rgba(255, 246, 220, 0.012) 52px 78px
+    );
+  opacity: 1;
+  transition: opacity 1s ease 0.2s;
+}
+.curtain-pulling .curtain-folds {
+  opacity: 0;
+}
+
+/* 夜底：开幕时缓缓抬升（晚于金线起步，中央始终先亮） */
+.gate-night {
+  transition: opacity 1.9s ease 0.35s;
+}
+.gate-night.night-lift {
+  opacity: 0;
+}
+
+/* 单根金线：纤细、墨金/亮金交替，底部渐隐 */
+.curtain-thread {
+  position: absolute;
+  top: -0.5%;
+  transform-origin: 50% 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 2.5%,
+    #000 84%,
+    transparent 99%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 2.5%,
+    #000 84%,
+    transparent 99%
+  );
+  animation: curtain-sway var(--dur, 8s) ease-in-out var(--delay, 0s) infinite alternate;
+  will-change: transform;
+}
+.thread-a {
+  background: linear-gradient(
+    180deg,
+    #6e4d1d 0%,
+    #caa14f 20%,
+    #584014 42%,
+    #efd78f 66%,
+    #8a6628 88%,
+    #d9b762 100%
+  );
+  box-shadow: 0 0 3px rgba(212, 175, 80, 0.16);
+}
+.thread-b {
+  background: linear-gradient(
+    180deg,
+    #4a3411 0%,
+    #a98234 26%,
+    #d8b462 48%,
+    #6b4d1d 70%,
+    #e6c678 92%,
+    #7d5b22 100%
+  );
+  box-shadow: 0 0 4px rgba(228, 198, 120, 0.2);
+}
+.thread-c {
+  background: linear-gradient(
+    180deg,
+    #8f6a2b 0%,
+    #f0da96 30%,
+    #97702b 52%,
+    #c9a04e 74%,
+    #5d4214 100%
+  );
+  box-shadow: 0 0 2px rgba(201, 169, 97, 0.14);
+}
+
+/* 风动：小幅、非对称、不同步，绝不像钟摆 */
+@keyframes curtain-sway {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  36% {
+    transform: translateX(calc(var(--sx, 2px) * 0.55)) rotate(calc(var(--sr, 0.2deg) * 0.6));
+  }
+  68% {
+    transform: translateX(calc(var(--sx, 2px) * -0.32)) rotate(calc(var(--sr, 0.2deg) * -0.38));
+  }
+  100% {
+    transform: translateX(var(--sx, 2px)) rotate(var(--sr, 0.2deg));
+  }
+}
+
+/* 开幕：每根线自顶部悬挂点向外荡开。
+   行程/倾角/延迟由 CSS 变量逐根给出，中线先走、贴边线几乎不动，
+   线底因旋转而拖后，形成帘幕被拉动时的自然弧度与褶皱波。 */
+@keyframes curtain-pull {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(var(--tx)) rotate(var(--rot));
+  }
+}
+.curtain-pulling .curtain-thread {
+  animation: curtain-pull 2.15s cubic-bezier(0.5, 0.02, 0.22, 1) var(--pull-delay, 0s) both;
+}
+
+/* 闭合时中缝的一缕垂直金光（在票后方），开幕时隐去 */
+.curtain-seam-glow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 140px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 97, 0.1) 35%,
+    rgba(233, 211, 150, 0.18) 50%,
+    rgba(201, 169, 97, 0.1) 65%,
+    transparent
+  );
+  filter: blur(14px);
+  transition: opacity 1.1s ease;
+}
+
+/* 开幕后残留在视口两缘的极细金边 */
+.curtain-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(233, 200, 118, 0.75) 8%,
+    rgba(244, 221, 146, 0.95) 50%,
+    rgba(233, 200, 118, 0.75) 92%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.curtain-edge-left {
+  left: 0;
+}
+.curtain-edge-right {
+  right: 0;
+}
+.curtain-edge.show {
+  opacity: 0.85;
+}
+.curtain-edge.fade {
+  transition-duration: 0.75s;
+  opacity: 0;
+}
+
+/* ===== 背景音乐开关声波 ===== */
+.music-ring {
+  animation: music-pulse 2.4s ease-out infinite;
+}
+.music-ring-2 {
+  animation-delay: 1.2s;
+}
+@keyframes music-pulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  body::after,
+  .gate-aurora,
+  .ticket-glow,
+  .ticket-float,
+  .foil-sheen,
+  .curtain-thread,
+  .curtain-pulling .curtain-thread,
+  .tarot-card,
+  .tarot-hint {
+    animation: none;
+  }
+  .tarot-inner,
+  .half-left-out,
+  .half-right-out,
+  .paper-frag,
+  .gate-night,
+  .curtain-folds {
+    transition: none;
+  }
+  .curtain-pulling .curtain-thread,
+  .curtain-pulling .curtain-folds,
+  .curtain-pulling .curtain-seam-glow {
+    opacity: 0;
+  }
+}
+
+/* 地图氛围罩：顶部紫光、底部压暗，不拦截任何点击 */
+.map-tint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 450;
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(124, 92, 191, 0.16), transparent 55%),
+    radial-gradient(90% 60% at 82% 108%, rgba(201, 169, 97, 0.06), transparent 60%),
+    linear-gradient(
+      to bottom,
+      rgba(10, 7, 16, 0.45),
+      transparent 20%,
+      transparent 68%,
+      rgba(10, 7, 16, 0.62)
+    );
+}
+
+/* ============================================================ */
+/* 命运抽了下你（/fate）                                         */
+/* ============================================================ */
+
+/* —— 签筒：静止时极缓慢呼吸式晃动 —— */
+.ft-rig {
+  transform-origin: 50% 100%;
+  animation: ft-idle-sway 9s ease-in-out infinite alternate;
+}
+@keyframes ft-idle-sway {
+  from { transform: rotate(-0.8deg); }
+  to   { transform: rotate(0.95deg); }
+}
+.ft-rig.shaking {
+  animation: ft-violent-shake 0.68s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+@keyframes ft-violent-shake {
+  0%   { transform: translate(0, 0) rotate(0); }
+  8%   { transform: translate(-7px, 2px) rotate(-1.6deg); }
+  16%  { transform: translate(6px, -2px) rotate(1.4deg); }
+  24%  { transform: translate(-8px, 1px) rotate(-1.1deg); }
+  32%  { transform: translate(7px, -3px) rotate(1.8deg); }
+  42%  { transform: translate(-5px, 2px) rotate(-0.9deg); }
+  52%  { transform: translate(4px, -1px) rotate(0.7deg); }
+  63%  { transform: translate(-3px, 1px) rotate(-0.4deg); }
+  75%  { transform: translate(2px, 0) rotate(0.2deg); }
+  100% { transform: translate(0, 0) rotate(0); }
+}
+
+/* 抖动瞬间，棱线残金短暂发亮 */
+.ft-crack-glow {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.ft-rig.shaking .ft-crack-glow {
+  animation: ft-crack-seep 0.68s ease-out both;
+}
+@keyframes ft-crack-seep {
+  0%   { opacity: 0; }
+  18%  { opacity: 0.95; }
+  55%  { opacity: 0.45; }
+  100% { opacity: 0; }
+}
+
+/* —— 被抽出的主签 —— */
+.ft-mover {
+  transform-style: preserve-3d;
+  /* 放大锚定签底：翻转放大时签底不动、签身向上长高，文字区放大且不压按钮 */
+  transform-origin: 50% 100%;
+  transform: translateY(var(--ty)) rotateY(var(--ry, 0deg)) scale(var(--sc, 1));
+  transition: transform var(--td, 0ms) cubic-bezier(0.45, 0.02, 0.2, 1);
+  will-change: transform;
+}
+.ft-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+.ft-inner.rising {
+  animation: ft-stick-sway 0.62s ease-in-out infinite alternate;
+}
+@keyframes ft-stick-sway {
+  from { transform: translateX(-3px) rotate(-2.2deg); }
+  to   { transform: translateX(3px) rotate(2.2deg); }
+}
+.ft-inner.floating {
+  animation: ft-bob 3.4s ease-in-out infinite alternate;
+}
+@keyframes ft-bob {
+  from { transform: translateY(-5px); }
+  to   { transform: translateY(6px); }
+}
+
+.ft-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  /* 拱顶签头（如意弧顶），底部微圆 */
+  border-radius: 50% 50% 4px 4px / 16% 16% 4px 4px;
+  /* 暗金签身 #b8963e：细密木纹 + 早晚材色调带，无斑点 */
+  background:
+    /* 穹顶受光 */
+    radial-gradient(120% 14% at 50% 2%, rgba(255, 240, 200, 0.32), rgba(255, 240, 200, 0.06) 55%, transparent 72%),
+    /* 纵向木纹：细密纹理线（贴金后透出的木理） */
+    linear-gradient(90deg, transparent 13.2%, rgba(96, 70, 30, 0.16) 13.8% 14.4%, transparent 15.2%),
+    linear-gradient(90deg, transparent 22.5%, rgba(96, 70, 30, 0.11) 23.1% 23.6%, transparent 24.4%),
+    linear-gradient(90deg, transparent 33.8%, rgba(80, 58, 24, 0.14) 34.5% 35.2%, transparent 36%),
+    linear-gradient(90deg, transparent 46.6%, rgba(96, 70, 30, 0.1) 47.2% 47.7%, transparent 48.5%),
+    linear-gradient(90deg, transparent 57.8%, rgba(80, 58, 24, 0.13) 58.5% 59.2%, transparent 60%),
+    linear-gradient(90deg, transparent 69.4%, rgba(96, 70, 30, 0.11) 70% 70.5%, transparent 71.3%),
+    linear-gradient(90deg, transparent 81.8%, rgba(80, 58, 24, 0.14) 82.5% 83.2%, transparent 84%),
+    linear-gradient(90deg, transparent 90.6%, rgba(96, 70, 30, 0.1) 91.1% 91.6%, transparent 92.4%),
+    /* 早晚材宽窄色调带 */
+    linear-gradient(90deg, rgba(140, 105, 48, 0.08) 0 8%, transparent 17%),
+    linear-gradient(90deg, transparent 40%, rgba(120, 88, 38, 0.07) 46% 54%, transparent 63%),
+    linear-gradient(90deg, transparent 88%, rgba(110, 80, 34, 0.06) 94% 100%),
+    /* 暖光左上 → 右侧沉入阴影 */
+    linear-gradient(90deg, rgba(255, 232, 176, 0.1), rgba(255, 232, 176, 0.16) 16%, rgba(255, 232, 176, 0.02) 44%, rgba(0, 0, 0, 0.26) 72%, rgba(0, 0, 0, 0.44) 100%),
+    /* 暗金底 */
+    linear-gradient(180deg, #c39d48 0%, #b8963e 46%, #94742c 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(46, 34, 14, 0.9),
+    inset 0 0 0 2px rgba(216, 180, 96, 0.35),
+    inset 2px 0 3px rgba(255, 238, 190, 0.14),
+    inset -2px 0 3px rgba(20, 14, 6, 0.4),
+    0 4px 14px rgba(0, 0, 0, 0.55);
+}
+/* 签身内侧极细描金边框（正反通用） */
+.ft-face::after {
+  content: '';
+  position: absolute;
+  inset: 4px 3.5px;
+  border: 0.5px solid rgba(216, 180, 96, 0.42);
+  border-radius: 50% 50% 3px 3px / 14% 14% 3px 3px;
+  pointer-events: none;
+}
+/* 签身贴图：Klimt 暗金木纹贴皮，叠在 .ft-face 木纹背景之上、朱红面板/签文/眼睛之下 */
+.ft-stick-skin {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+/* 签顶卷草纹饰 */
+.ft-ornament {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  opacity: 0.62;
+}
+/* 签持在筒前时，投在筒身上的影子 */
+.ft-stick-shadow {
+  position: absolute;
+  z-index: 35;
+  left: calc(50% + 7px);
+  top: 10%;
+  width: clamp(30px, 9.6vw, 41px);
+  height: 27%;
+  transform: translateX(-50%);
+  border-radius: 40% 40% 50% 50%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.3) 55%, transparent);
+  filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  pointer-events: none;
+}
+.ft-stick-shadow.on {
+  opacity: 0.55;
+}
+.ft-face-front {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 2px 10px;
+}
+/* 朱红签文面板（参考传统签条形制）：垫在两列签文之后 */
+.ft-panel-behind::before {
+  content: '';
+  position: absolute;
+  inset: 5.5% 10% 3.5%;
+  border-radius: 2.5px;
+  background: linear-gradient(180deg, rgba(146, 44, 24, 0.42), rgba(100, 30, 16, 0.5));
+  box-shadow:
+    inset 0 0 0 0.5px rgba(232, 192, 110, 0.5),
+    inset 0 0 5px rgba(58, 12, 5, 0.45),
+    0 0 4px rgba(0, 0, 0, 0.18);
+}
+.ft-face-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 15px;
+}
+
+/* 翻转期间签身的光晕（独立层，避开 clip-path 裁切） */
+.ft-halo {
+  position: absolute;
+  inset: -14px -18px;
+  border-radius: 40%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(227, 203, 143, 0.5), rgba(157, 124, 216, 0.16) 45%, transparent 72%);
+  filter: blur(9px);
+  opacity: 0;
+  transform: translateZ(-3px);
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.ft-halo.lit {
+  opacity: 1;
+}
+
+/* —— 正面竖排刻字 —— */
+.ft-col {
+  writing-mode: vertical-rl;
+  font-family: "Noto Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  font-size: clamp(8.8px, 2.18vw, 10px);
+  letter-spacing: 0.05em;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+.ft-col .ft-char {
+  opacity: 0;
+  display: inline-block;
+}
+.ft-chars-on .ft-char {
+  animation: ft-carved 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  animation-delay: var(--d, 0s);
+}
+@keyframes ft-carved {
+  0% {
+    opacity: 0;
+    transform: translateY(5px) scale(1.18);
+    filter: blur(1.4px);
+  }
+  55% { opacity: 0.78; }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+/* 宜：亮朱红 + 白描边；忌：米白；正文：米白 —— 红白字在深朱红面板上一读即清 */
+.ft-label-yi {
+  color: #ff4d2e;
+  font-weight: 700;
+  text-shadow:
+    0 0 6px rgba(255, 200, 150, 0.7),
+    1px 0 0 #fff8e6,
+    -1px 0 0 #fff8e6,
+    0 1px 0 #fff8e6,
+    0 -1px 0 #fff8e6,
+    0 -1px 1px rgba(36, 6, 3, 0.85);
+}
+.ft-label-ji {
+  color: #f5e9d4;
+  font-weight: 700;
+  text-shadow:
+    0 0 4px rgba(255, 224, 170, 0.55),
+    0 -1px 1px rgba(60, 20, 8, 0.7);
+}
+.ft-text {
+  color: #f5e9d4;
+  font-weight: 600;
+  text-shadow:
+    0 0 3px rgba(255, 232, 180, 0.4),
+    0 -1px 1px rgba(60, 20, 8, 0.6);
+}
+
+/* —— 反面眼睛 —— */
+.ft-eye-wrap {
+  opacity: 0;
+  transform: scale(0.2);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.4s ease;
+}
+.ft-eye-wrap.on {
+  opacity: 1;
+  transform: scale(1);
+}
+.ft-eyelid {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ft-eyelid.blink {
+  animation: ft-blink 0.3s ease-in-out;
+}
+.ft-pupil {
+  transform: scale(0.16);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ft-pupil.big { transform: scale(1); }
+.ft-gaze {
+  transform: translateX(0);
+  transition: transform 0.45s ease-in-out;
+}
+.ft-gaze.left  { transform: translateX(-7px); }
+.ft-gaze.right { transform: translateX(7px); }
+@keyframes ft-blink {
+  0%, 100% { transform: scaleY(1); }
+  42%      { transform: scaleY(0.07); }
+}
+.ft-watched {
+  margin-top: 7px;
+  writing-mode: vertical-rl;
+  font-size: 8.5px;
+  letter-spacing: 0.24em;
+  color: #241a0e;
+  text-shadow: 0 1px 0 rgba(255, 236, 190, 0.32);
+  opacity: 0;
+  transition: opacity 0.5s ease 0.35s;
+}
+.ft-watched.on {
+  opacity: 0.95;
+}
+
+/* —— 出签碎屑：鎏金箔片 + 星尘（两种质感） —— */
+.ft-foil {
+  position: absolute;
+  bottom: 90%;
+  opacity: 0;
+  background: linear-gradient(135deg, #f7e6ab 0%, #d9b45f 36%, #a37c30 62%, #e9cd82 86%, #f7e6ab 100%);
+  filter: drop-shadow(0 0 3px rgba(240, 210, 130, 0.7));
+  animation:
+    ft-foil-fall var(--sd, 1.8s) cubic-bezier(0.3, 0.32, 0.52, 1) var(--sdelay, 0s) forwards,
+    ft-foil-glint 0.9s ease-in-out var(--sdelay, 0s) infinite;
+}
+/* 三种不规则箔片剪形（clip 后 drop-shadow 仍是完整轮廓光） */
+.ft-foil-v0 { clip-path: polygon(0 22%, 42% 0, 100% 18%, 86% 78%, 46% 100%, 8% 82%); }
+.ft-foil-v1 { clip-path: polygon(0 40%, 30% 8%, 78% 0, 100% 46%, 72% 96%, 22% 100%); }
+.ft-foil-v2 { clip-path: polygon(6% 0, 94% 10%, 100% 62%, 58% 100%, 0 84%); }
+@keyframes ft-foil-fall {
+  0%   { opacity: 0; transform: translate(0, -8px) rotate(0deg) scale(0.7); }
+  10%  { opacity: 1; }
+  55%  { opacity: 0.95; }
+  100% { opacity: 0; transform: translate(var(--drift, 20px), var(--fall, 110px)) rotate(var(--spin, 480deg)) scale(1); }
+}
+@keyframes ft-foil-glint {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(240, 210, 130, 0.7)) brightness(0.94); }
+  50%      { filter: drop-shadow(0 0 6px rgba(255, 238, 176, 0.95)) brightness(1.5); }
+}
+.ft-star {
+  position: absolute;
+  bottom: 90%;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 50%, #fff8e0 0%, #f4dc96 40%, rgba(216, 178, 96, 0.28) 68%, transparent 100%);
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  animation:
+    ft-star-fall var(--sd, 2.2s) ease-in var(--sdelay, 0s) forwards,
+    ft-star-tw 0.7s ease-in-out var(--sdelay, 0s) infinite;
+}
+@keyframes ft-star-fall {
+  0%   { opacity: 0; transform: translate(0, -6px) rotate(0deg) scale(0.3); }
+  14%  { opacity: 1; transform: translate(calc(var(--drift, 20px) * 0.18), 8px) rotate(22deg) scale(1.05); }
+  45%  { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(var(--drift, 20px), var(--fall, 130px)) rotate(var(--spin, 80deg)) scale(0.5); }
+}
+@keyframes ft-star-tw {
+  0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 232, 160, 0.8)); }
+  50%      { filter: drop-shadow(0 0 7px rgba(255, 240, 190, 1)) brightness(1.45); }
+}
+
+/* —— 钉在墙上的签 —— */
+.ft-pinned {
+  animation: ft-pin-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  transform-origin: 50% 8px;
+}
+@keyframes ft-pin-in {
+  0%   { transform: translateY(-26px) scale(0.9); opacity: 0; }
+  70%  { transform: translateY(3px) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ft-rig,
+  .ft-rig.shaking,
+  .ft-inner.rising,
+  .ft-inner.floating,
+  .ft-chars-on .ft-char,
+  .ft-foil,
+  .ft-star,
+  .ft-pinned {
+    animation: none !important;
+  }
+  .ft-mover {
+    transition: none !important;
+  }
+  .ft-char {
+    opacity: 1 !important;
+  }
+}
