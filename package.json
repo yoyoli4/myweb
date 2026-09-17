@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start"
   },
+  "engines": {
+    "node": ">=18.17"
+  },
   "dependencies": {
     "leaflet": "1.9.4",
     "next": "^14.2.35",

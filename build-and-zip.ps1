@@ -1,5 +1,5 @@
 # ---------------------------------------------------------------------------
-# 一键静态导出 + 打包脚本（用于上传腾讯云 EdgeOne Pages / 任何静态托管）
+# 一键静态导出 + 打包脚本（本地备用方案；EdgeOne 走 GitHub 自动构建，用不到它）
 #
 # 用法：在项目文件夹右键 → 用 PowerShell 运行，或：
 #   powershell -ExecutionPolicy Bypass -File .\build-and-zip.ps1
@@ -24,32 +24,16 @@ if (-not $nodeCmd) {
   }
 }
 
-# 2) 静态导出不支持服务端 API（留言板 /api/messages），构建时临时禁用，结束后恢复
-$apiDir = Join-Path $root 'src\app\api'
-$bakDir = Join-Path $root 'src\app\_api_disabled'
-$buildOk = $false
+# 2) 静态导出模式：next.config.mjs 会据此启用 output:'export' 并排除 api 路由
+$env:STATIC_EXPORT = '1'
 
-try {
-  if (Test-Path $apiDir) {
-    Move-Item $apiDir $bakDir -Force
-    Write-Host "[info] 临时禁用 API 目录（静态导出不支持）" -ForegroundColor Cyan
-  }
-
-  # 3) 构建静态产物到 out/
-  Write-Host "[info] npm run build ..." -ForegroundColor Cyan
-  npm run build
-  if ($LASTEXITCODE -ne 0) { throw "构建失败（exit $LASTEXITCODE）" }
-  $buildOk = $true
+# 3) 构建静态产物到 out/
+Write-Host "[info] npm run build (STATIC_EXPORT=1) ..." -ForegroundColor Cyan
+npm run build
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "[error] 构建失败（exit $LASTEXITCODE）" -ForegroundColor Red
+  exit 1
 }
-finally {
-  # 无论成功失败都恢复 api 目录，避免工程停留在半迁移状态
-  if (Test-Path $bakDir) {
-    Move-Item $bakDir $apiDir -Force
-    Write-Host "[info] 已恢复 API 目录" -ForegroundColor Cyan
-  }
-}
-
-if (-not $buildOk) { exit 1 }
 
 # 4) 打包 out 目录【内容】为 zip（zip 根直接是 index.html，不套 out 文件夹）
 # 注意：必须逐个条目添加并把路径分隔符统一成正斜杠 /（zip 标准）。
