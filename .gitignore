@@ -5,8 +5,8 @@ node_modules/
 .next/
 out/
 
-# build artifact
-sicksuckworld-site.zip
+# build artifact / 打包产物（不进 git）
+*.zip
 
 # misc
 .DS_Store
