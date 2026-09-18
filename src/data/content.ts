@@ -971,3 +971,36 @@ export const fortunes: Fortune[] = [
     ji: '把窗帘拉开一条缝去确认世界还在。',
   },
 ]
+
+// ---------------------------------------------------------------------------
+// 陈列架（/shelf）：正在读的书、看的片、听的歌。随手在 content.ts 增删。
+// cover 可不填，不填就用纯排版卡片。tag 例如：在读 / 想读 / 读完了
+// ---------------------------------------------------------------------------
+
+export interface ShelfItem {
+  title: string
+  creator: string        // 作者 / 导演 / 音乐人
+  note?: string          // 一句短评
+  cover?: string         // 可选封面图（/images/... 或远程链接）
+  tag?: string           // 状态标签
+}
+
+export const shelf: { books: ShelfItem[]; films: ShelfItem[]; music: ShelfItem[] } = {
+  books: [
+    { title: '地下室手记', creator: '陀思妥耶夫斯基', note: '一个人在地下活得比地上还热闹。', tag: '读完了' },
+    { title: '白痴', creator: '陀思妥耶夫斯基', note: '善良的人是这个世界的系统漏洞。', tag: '在读' },
+    { title: '人间失格', creator: '太宰治', note: '胆小鬼连幸福都会害怕，碰到棉花都会受伤。', tag: '读完了' },
+    { title: '庄子', creator: '庄周', note: '他做梦变成蝴蝶之后就没打算醒过来上班。', tag: '反复读' },
+  ],
+  films: [
+    { title: '伦敦生活', creator: 'Phoebe Waller-Bridge', note: '她对着镜头挑眉，我对着生活崩溃。', tag: '二刷' },
+    { title: '布达佩斯大饭店', creator: 'Wes Anderson', note: '对称构图是人类对抗虚无的方式。', tag: '看过' },
+    { title: '潜行者', creator: '塔可夫斯基', note: '三个小时走了几百米，走的是我后半生。', tag: '想看' },
+    { title: '千年女优', creator: '今敏', note: '我爱的从来不是你，是追着你跑的我自己。', tag: '看过' },
+  ],
+  music: [
+    { title: 'Ophelia Dream', creator: '奥菲利亚的梦', note: '适合在水底写信的时候放。', tag: '循环' },
+    { title: 'Dance for Me Wallis', creator: 'Abel Korzeniowski', note: '每次听都觉得自己应该在雨天和谁私奔。', tag: '循环' },
+    { title: '天地缓缓（古琴版）', creator: '闻神', note: '听完想原谅所有人，包括自己。', tag: '循环' },
+  ],
+}

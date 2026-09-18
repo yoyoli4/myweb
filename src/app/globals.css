@@ -54,6 +54,18 @@ body {
   animation: fade-rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* 黑胶唱片匀速旋转 */
+@keyframes vinyl-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.vinyl-spin {
+  animation: vinyl-spin 7s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vinyl-spin { animation: none; }
+}
+
 /* ------------------------------------------------------------------ */
 /* Leaflet 地图皮肤                                                    */
 /* ------------------------------------------------------------------ */

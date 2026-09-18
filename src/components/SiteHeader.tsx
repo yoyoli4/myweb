@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 const navItems = [
   { href: '/', label: '征途', short: '征途' },
   { href: '/articles', label: '剧情', short: '剧情' },
+  { href: '/shelf', label: '陈列架', short: '陈列' },
   { href: '/toilet', label: '马桶里', short: '马桶里' },
   { href: '/fate', label: '命运抽了下你', short: '命运签' },
   { href: '/interact', label: '提问箱', short: '提问' },
@@ -19,15 +20,15 @@ export default function SiteHeader() {
 
   return (
     <header className="pointer-events-none fixed inset-x-0 top-0 z-[1000]">
-      <div className="pointer-events-auto flex h-16 items-center justify-between gap-3 border-b border-gold/15 bg-ink/70 px-4 backdrop-blur-md sm:px-8">
+      <div className="pointer-events-auto flex h-16 items-center justify-between gap-2 border-b border-gold/15 bg-ink/70 px-3 backdrop-blur-md sm:gap-3 sm:px-8">
         <Link
           href="/"
-          className="shrink-0 font-serif text-sm tracking-[0.18em] text-gold-bright transition-colors hover:text-white sm:text-lg sm:tracking-[0.32em]"
+          className="shrink-0 font-serif text-[13px] tracking-[0.1em] text-gold-bright transition-colors hover:text-white sm:text-lg sm:tracking-[0.32em]"
         >
           呕心小世界
         </Link>
 
-        <nav className="flex items-center gap-3 text-[13px] sm:gap-9 sm:text-[15px]">
+        <nav className="flex items-center gap-2 text-[12px] sm:gap-9 sm:text-[15px]">
           {navItems.map((item) => {
             const active = isActive(item.href)
             return (

@@ -8,11 +8,20 @@
  *  - tiandi-huanhuan.flac（闻神 - 天地缓缓 古琴版）
  */
 
-const TRACKS = [
-  { src: '/music/ophelia-dream.mp3', name: 'Ophelia Dream' },
-  { src: '/music/dance-for-me-wallis.mp3', name: 'Dance for Me Wallis' },
-  { src: '/music/tiandi-huanhuan.flac', name: '天地缓缓（古琴版）' },
-]
+export const TRACKS = [
+  { src: '/music/ophelia-dream.mp3', name: '奥菲利亚的梦', sub: 'Ophelia Dream' },
+  { src: '/music/dance-for-me-wallis.mp3', name: 'Dance for Me Wallis', sub: 'Abel Korzeniowski' },
+  { src: '/music/tiandi-huanhuan.flac', name: '天地缓缓', sub: '古琴版 · 闻神' },
+] as const
+
+export interface MusicState {
+  started: boolean   // 唱机是否已启动
+  paused: boolean    // 是否暂停
+  cur: number        // 当前曲目下标
+  count: number
+}
+
+type Listener = (s: MusicState) => void
 
 export class AmbientMusic {
   private ctx: AudioContext | null = null
@@ -21,22 +30,44 @@ export class AmbientMusic {
   private sources: MediaElementAudioSourceNode[] = []
   private gains: GainNode[] = []
   private cur = 0
-  private playing = false
+  private started = false
+  private paused = false
   private checkTimer: number | null = null
+  private swapTimer: number | null = null
+  private fadingTo: number | null = null
+  private listeners = new Set<Listener>()
   private readonly crossfade = 4.5 // 秒
+  private readonly volume = 0.32
+
+  subscribe(fn: Listener): () => void {
+    this.listeners.add(fn)
+    fn(this.getState())
+    return () => {
+      this.listeners.delete(fn)
+    }
+  }
+
+  private emit() {
+    const s = this.getState()
+    this.listeners.forEach((fn) => fn(s))
+  }
+
+  getState(): MusicState {
+    return { started: this.started, paused: this.paused, cur: this.cur, count: TRACKS.length }
+  }
 
   async start() {
-    if (this.playing) return
+    if (this.started) return
     const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
     this.ctx = new Ctx()
     const ctx = this.ctx
     await ctx.resume()
 
-    // 共享主控音量：两首曲目都从这里出，天然音量同步
+    // 共享主控音量
     this.master = ctx.createGain()
     this.master.gain.value = 0
     this.master.connect(ctx.destination)
-    this.master.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 2)
+    this.master.gain.linearRampToValueAtTime(this.volume, ctx.currentTime + 2)
 
     TRACKS.forEach((t, i) => {
       const el = new Audio(t.src)
@@ -47,7 +78,7 @@ export class AmbientMusic {
       el.volume = 1
       const src = ctx.createMediaElementSource(el)
       const g = ctx.createGain()
-      g.gain.value = i === 0 ? 1 : 0 // 第一首满音量，第二首 0
+      g.gain.value = i === 0 ? 1 : 0
       src.connect(g)
       g.connect(this.master!)
       this.elements.push(el)
@@ -55,52 +86,109 @@ export class AmbientMusic {
       this.gains.push(g)
     })
 
-    this.playing = true
+    this.started = true
+    this.paused = false
     this.cur = 0
     await this.elements[0].play().catch(() => {})
+    this.emit()
     this.scheduleLoop()
   }
 
-  private scheduleLoop = () => {
-    if (!this.playing || !this.ctx) return
+  /** 手动切到指定曲目（交叉淡入淡出） */
+  private crossfadeTo(nextIdx: number) {
+    if (!this.ctx) return
+    if (nextIdx === this.cur && this.fadingTo === null) return
     const now = this.ctx.currentTime
+    const curEl = this.elements[this.cur]
+    const nextEl = this.elements[nextIdx]
+
+    nextEl.preload = 'auto'
+    nextEl.load()
+
+    // 取消上一次未完成的换曲收尾
+    if (this.swapTimer) window.clearTimeout(this.swapTimer)
+
+    const gCur = this.gains[this.cur]
+    const gNext = this.gains[nextIdx]
+    gCur.gain.cancelScheduledValues(now)
+    gCur.gain.setValueAtTime(gCur.gain.value, now)
+    gCur.gain.linearRampToValueAtTime(0, now + this.crossfade)
+    gNext.gain.cancelScheduledValues(now)
+    gNext.gain.setValueAtTime(gNext.gain.value, now)
+    gNext.gain.linearRampToValueAtTime(this.paused ? 0 : 1, now + this.crossfade)
+    void nextEl.play().catch(() => {})
+
+    this.fadingTo = nextIdx
+    this.swapTimer = window.setTimeout(() => {
+      curEl.pause()
+      curEl.currentTime = 0
+      this.cur = nextIdx
+      this.fadingTo = null
+      this.swapTimer = null
+      this.emit()
+    }, this.crossfade * 1000 + 700)
+  }
+
+  next() {
+    if (!this.started) return
+    this.crossfadeTo((this.cur + 1) % TRACKS.length)
+  }
+
+  prev() {
+    if (!this.started) return
+    this.crossfadeTo((this.cur - 1 + TRACKS.length) % TRACKS.length)
+  }
+
+  /** 暂停 / 继续（手动切换） */
+  async togglePause() {
+    if (!this.started || !this.ctx || !this.master) return
+    const now = this.ctx.currentTime
+    if (!this.paused) {
+      this.paused = true
+      this.master.gain.cancelScheduledValues(now)
+      this.master.gain.setValueAtTime(this.master.gain.value, now)
+      this.master.gain.linearRampToValueAtTime(0.0001, now + 0.45)
+      window.setTimeout(() => {
+        void this.ctx?.suspend()
+        this.elements.forEach((el) => el.pause())
+      }, 460)
+    } else {
+      this.paused = false
+      await this.ctx.resume()
+      void this.elements[this.fadingTo ?? this.cur].play().catch(() => {})
+      this.master.gain.cancelScheduledValues(now)
+      this.master.gain.setValueAtTime(this.master.gain.value, now)
+      this.master.gain.linearRampToValueAtTime(this.volume, now + 1.2)
+    }
+    this.emit()
+  }
+
+  private scheduleLoop = () => {
+    if (!this.started || !this.ctx) return
     const cur = this.elements[this.cur]
     const nextIdx = (this.cur + 1) % TRACKS.length
     const next = this.elements[nextIdx]
 
-    if (cur.duration && isFinite(cur.duration)) {
+    if (cur.duration && isFinite(cur.duration) && this.fadingTo === null) {
       const remain = cur.duration - cur.currentTime
       // 提前约 60 秒开始缓冲下一首（避免交叉淡入时还没下载完）
       if (remain <= 60 && next.preload !== 'auto') {
         next.preload = 'auto'
         next.load()
       }
-      // 剩 crossfade 秒时启动下一首并交叉淡入淡出
-      if (remain <= this.crossfade + 0.2 && next.paused) {
-        void next.play().catch(() => {})
-        const gCur = this.gains[this.cur]
-        const gNext = this.gains[nextIdx]
-        gCur.gain.cancelScheduledValues(now)
-        gCur.gain.setValueAtTime(gCur.gain.value, now)
-        gCur.gain.linearRampToValueAtTime(0, now + this.crossfade)
-        gNext.gain.cancelScheduledValues(now)
-        gNext.gain.setValueAtTime(0, now)
-        gNext.gain.linearRampToValueAtTime(1, now + this.crossfade)
-      }
-      // 当前曲播完（已淡尽），切到下一首并复位
-      if (remain <= 0.6) {
-        cur.pause()
-        cur.currentTime = 0
-        this.cur = nextIdx
+      // 自然播完前 crossfade 秒启动下一首
+      if (remain <= this.crossfade + 0.2 && next.paused && !this.paused) {
+        this.crossfadeTo(nextIdx)
       }
     }
     this.checkTimer = window.setTimeout(this.scheduleLoop, 500)
   }
 
   stop() {
-    if (!this.playing) return
-    this.playing = false
+    if (!this.started) return
+    this.started = false
     if (this.checkTimer) window.clearTimeout(this.checkTimer)
+    if (this.swapTimer) window.clearTimeout(this.swapTimer)
     const ctx = this.ctx
     if (ctx && this.master) {
       const now = ctx.currentTime
@@ -119,11 +207,15 @@ export class AmbientMusic {
       this.elements = []
       this.sources = []
       this.gains = []
+      this.paused = false
+      this.cur = 0
+      this.fadingTo = null
+      this.emit()
     }, 1300)
   }
 
   isPlaying() {
-    return this.playing
+    return this.started
   }
 }
 
