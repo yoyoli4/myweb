@@ -3,7 +3,6 @@ import './globals.css'
 import SiteHeader from '@/components/SiteHeader'
 import TicketGate from '@/components/TicketGate'
 import ClickSound from '@/components/ClickSound'
-import VinylPlayer from '@/components/VinylPlayer'
 
 export const metadata: Metadata = {
   title: {
@@ -41,7 +40,6 @@ export default function RootLayout({
         <ClickSound />
         <SiteHeader />
         {children}
-        <VinylPlayer />
       </body>
     </html>
   )
