@@ -9,7 +9,7 @@ const navItems = [
   { href: '/notes', label: '关卡', short: '关卡' },
   { href: '/toilet', label: '马桶里', short: '马桶里' },
   { href: '/fate', label: '命运抽了下你', short: '命运签' },
-  { href: '/interact', label: '互动', short: '互动' },
+  { href: '/interact', label: '提问箱', short: '提问' },
 ]
 
 export default function SiteHeader() {

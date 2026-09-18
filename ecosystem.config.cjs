@@ -23,8 +23,11 @@ module.exports = {
       watch: false,
       env: {
         NODE_ENV: 'production',
+        // 提问箱后台管理密钥（访问 /interact/admin 时输入）
+        // 部署后建议改成你自己的密码：改完执行 pm2 restart sicksuckworld --update-env
+        ADMIN_KEY: 'sicksuck-admin',
       },
-      // 留言板数据目录（与 src/lib/messages.ts 里 process.cwd()/data 一致）
+      // 提问数据目录（与 src/lib/messages.ts 里 process.cwd()/data 一致）
       // 宝塔上确保项目目录对运行用户可写
     },
   ],

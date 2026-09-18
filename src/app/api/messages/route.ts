@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readMessages, writeMessages, randomNickname, type Message } from '@/lib/messages'
+import { readMessages, writeMessages, randomNickname, type Question } from '@/lib/messages'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+/** 公开接口：只返回「已回答且已公开」的问题（按回答时间倒序） */
 export async function GET() {
-  const messages = readMessages().sort((a, b) => b.createdAt - a.createdAt)
-  return NextResponse.json({ messages })
+  const questions = readMessages()
+    .filter((q) => q.published && q.answer && q.answer.trim())
+    .sort((a, b) => (b.answeredAt ?? b.createdAt) - (a.answeredAt ?? a.createdAt))
+  return NextResponse.json({ questions })
 }
 
+/** 游客提交问题：默认不公开、无回答，仅站主后台可见 */
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -17,19 +21,19 @@ export async function POST(req: NextRequest) {
     if (!text && !audio) {
       return NextResponse.json({ error: '内容不能为空' }, { status: 400 })
     }
-    const message: Message = {
+    const question: Question = {
       id: crypto.randomUUID(),
       nickname: randomNickname(),
       text,
       audio,
       createdAt: Date.now(),
-      replies: [],
+      published: false,
     }
     const all = readMessages()
-    all.push(message)
+    all.push(question)
     writeMessages(all)
-    return NextResponse.json({ message })
-  } catch (e) {
+    return NextResponse.json({ ok: true })
+  } catch {
     return NextResponse.json({ error: '保存失败' }, { status: 500 })
   }
 }
