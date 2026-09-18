@@ -237,43 +237,6 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* 关卡卡片：克里姆特生图边框（CSS mask 中空，只显示 padding 边框区域） */
-/* ------------------------------------------------------------------ */
-.note-card {
-  position: relative;
-}
-.klimt-border-img {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.62;
-  border-radius: inherit;
-  box-sizing: border-box;
-  padding: 14px;
-  /* mask：content-box 区域透明，padding 边框区域显示 background */
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-          mask-composite: exclude;
-}
-@media (min-width: 640px) {
-  .klimt-border-img {
-    padding: 18px;
-    opacity: 0.7;
-  }
-}
-/* reduce motion 不影响边框，但避免重绘闪烁 */
-@media (prefers-reduced-motion: reduce) {
-  .klimt-border-img {
-    opacity: 0.5;
-  }
-}
-
-/* ------------------------------------------------------------------ */
 /* 入场票据                                                            */
 /* ------------------------------------------------------------------ */
 

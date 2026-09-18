@@ -35,13 +35,6 @@ export interface Article {
   blocks: ArticleBlock[]
 }
 
-export interface Note {
-  id: string
-  date: string          // 'YYYY-MM-DD'
-  text: string
-  image?: string        // 一张图，可以不填
-}
-
 export interface Painting {
   id: string
   title: string         // 画名
@@ -802,23 +795,6 @@ export const articles: Article[] = [
       { type: 'p', text: '我也不知道。' },
       { type: 'quote', text: '我也是个某某。' },
     ],
-  },
-]
-
-// ---------------------------------------------------------------------------
-// 日常记录（顺序无所谓，页面会自动按时间倒序排列）
-// ---------------------------------------------------------------------------
-
-export const notes: Note[] = [
-  {
-    id: 'n-008',
-    date: '2026-09-13',
-    text: '啦啦啦啦啦啦啦啦',
-  },
-  {
-    id: 'n-007',
-    date: '2026-09-12',
-    text: '以前的错误就像干掉的鸟屎粘在衣服上，怎么洗都洗不掉……最糟糕的是我只有这一件衣服。',
   },
 ]
 
